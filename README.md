@@ -20,3 +20,10 @@ CLI command to run:
 ```
 deno run --allow-read --allow-write main.js
 ```
+
+### Additional Arguments
+You can also specify a filename for the combined region csv, like this:
+```
+deno run --allow-read --allow-write main.js RegionData
+```
+This will result in `RegionData.csv` being created instead of the default `AllRegions.csv`.

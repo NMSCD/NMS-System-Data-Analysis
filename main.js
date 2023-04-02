@@ -21,10 +21,10 @@ for (const region of regions) {
 		const systemDataObj = JSON.parse(useableFileContent)[0];
 		const extractedDataObj = extractData(systemDataObj);
 		regionDataArray.push(extractedDataObj);
-		globalDataArray.push(extractedDataObj);
 	}
 	createCSV(regionName, regionDataArray);
 	console.log(`${regionName} done`)
+	globalDataArray.push(...regionDataArray);
 }
 createCSV(civ, globalDataArray);
 console.log(`Finished!`)
@@ -50,8 +50,7 @@ function extractData(obj) {
 
 	if (civ) {
 		const validCivs = Object.keys(getRegionData());
-		const validCivsLowercase = validCivs.map(item => item.toLowerCase());
-		if (validCivsLowercase.includes(civ.toLowerCase())) {
+		if (validCivs.includes(civ.toLowerCase())) {
 			const { Glyphs, Name } = outputObj;
 			const tagStatus = isCorrectlyTagged(Glyphs, Name);
 			outputObj['Correctly Tagged'] = tagStatus;
@@ -98,13 +97,13 @@ function isCorrectlyTagged(glyphs, name) {
 		return SIDNumber;
 	})();
 	const region = glyphs.substring(4);
-	const regionIndex = Object.keys(regionData[civ]).indexOf(region) + 1;
+	const regionIndex = Object.keys(regionData[civ.toLowerCase()]).indexOf(region) + 1;
 	return name.startsWith(`[HUB${regionIndex}-${SIV}]`);
 }
 
 function getRegionData() {
 	return {
-		EisHub: {
+		eishub: {
 			'F9556C30': 'Riwala',
 			'F9555C30': 'Omskio Instability',
 			'F9555C31': 'Marcki',

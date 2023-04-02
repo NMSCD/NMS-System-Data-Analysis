@@ -25,7 +25,7 @@ for (const region of regions) {
 	createCSV(regionName, regionDataArray);
 	console.log(`${regionName} done`)
 }
-createCSV('EisHub', globalDataArray);
+createCSV('AllRegions', globalDataArray);
 console.log(`Finished!`)
 
 

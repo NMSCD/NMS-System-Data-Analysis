@@ -3,12 +3,14 @@ import { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
 const dataFolder = './data/';
 const regions = Deno.readDirSync(dataFolder);
 const civ = Deno.args[0] || 'AllRegions';
+const validCivs = Object.keys(getRegionData());
 const globalDataArray = [];
 for (const region of regions) {
 	const regionName = region.name;
 	const systems = Deno.readDirSync(dataFolder + regionName);
 	const regionDataArray = [];
 	for (const system of systems) {
+		if (!system.name.endsWith('.json')) continue;
 		const fileContent = Deno.readTextFileSync(dataFolder + region.name + '/' + system.name).trim();
 		const intermediateFileContent = fileContent.trim().substring(4, fileContent.length - 5);
 		const useableFileContent = (() => {
@@ -23,6 +25,7 @@ for (const region of regions) {
 		regionDataArray.push(extractedDataObj);
 	}
 	createCSV(regionName, regionDataArray);
+	if (validCivs.includes(civ.toLowerCase())) createRegionTxt(regionName, regionDataArray);
 	console.log(`${regionName} done`)
 	globalDataArray.push(...regionDataArray);
 }
@@ -48,13 +51,10 @@ function extractData(obj) {
 		Timestamp: buildDate(obj.TS),
 	}
 
-	if (civ) {
-		const validCivs = Object.keys(getRegionData());
-		if (validCivs.includes(civ.toLowerCase())) {
-			const { Glyphs, Name } = outputObj;
-			const tagStatus = isCorrectlyTagged(Glyphs, Name);
-			outputObj['Correctly Tagged'] = tagStatus;
-		}
+	if (validCivs.includes(civ.toLowerCase())) {
+		const { Glyphs, Name } = outputObj;
+		const tagStatus = isCorrectlyTagged(Glyphs, Name);
+		outputObj['Correctly Tagged'] = tagStatus;
 	}
 
 	return outputObj;
@@ -88,17 +88,51 @@ function buildDate(timestamp) {
 
 function isCorrectlyTagged(glyphs, name) {
 	if (!name) return false;
-	const regionData = getRegionData()
+	const expected = buildExpectedTag(glyphs);
+	return name.startsWith(expected);
+}
+
+function buildExpectedTag(glyphs) {
+	const regionData = getRegionData();
 	const SIV = (() => {
 		const SID = glyphs.substring(1, 4);
 		const SIDDecNumber = parseInt(SID, 16);
 		const SIDNumber = SIDDecNumber.toString(16).toUpperCase();
-		if (SIDNumber == 69) return '68+1';
+		if (SIDNumber == 69)
+			return '68+1';
 		return SIDNumber;
 	})();
 	const region = glyphs.substring(4);
 	const regionIndex = Object.keys(regionData[civ.toLowerCase()]).indexOf(region) + 1;
-	return name.startsWith(`[HUB${regionIndex}-${SIV}]`);
+	const expected = `[HUB${regionIndex}-${SIV}]`;
+	return expected;
+}
+
+function createRegionTxt(regionName, regionDataArray) {
+	const headers = ['Other Systems', 'Missing HUB Tag'].map(heading => `==${heading}==`);
+	const other = [];
+	const missing = [];
+	const arrayCollection = [other, missing];
+	const txtContent = [];
+
+	for (const system of regionDataArray) {
+		if (system['Correctly Tagged']) {
+			other.push(system.Name);
+		} else {
+			const expected = buildExpectedTag(system.Glyphs);
+			if (system.Name) missing.push(`${system.Name} (Expected Tag: ${expected.substring(1, expected.length - 1)})`);
+		}
+	}
+
+	for (let i = 0; i < arrayCollection.length; i++) {
+		const array = arrayCollection[i].map(item => '* ' + item.replace(/[{\[\]}]/g, ''));
+		if (!array.length) continue;
+		array.sort();
+		txtContent.push(headers[i], ...array, '');
+	}
+
+	const content = txtContent.join('\n');
+	if (content) Deno.writeTextFileSync(`${regionName}.txt`, content.trim());
 }
 
 function getRegionData() {

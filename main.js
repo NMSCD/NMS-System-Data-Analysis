@@ -12,7 +12,19 @@ for (const region of regions) {
 	for (const system of systems) {
 		if (!system.name.endsWith('.json')) continue;
 		const fileContent = Deno.readTextFileSync(dataFolder + region.name + '/' + system.name);
-		const systemDataObj = JSON.parse(fileContent)[0];
+		const systemDataObj = (() => {
+			try {
+				const json = JSON.parse(fileContent)[0];
+				return json;
+			} catch (_error) {
+				return {
+					DD: { UA: '' },
+					USN: '',
+					PTK: '',
+					TS: '',
+				}
+			}
+		})();
 		const extractedDataObj = extractData(systemDataObj);
 		regionDataArray.push(extractedDataObj);
 	}
@@ -72,6 +84,7 @@ function createCSVBody(regionDataArray) {
 }
 
 function buildDate(timestamp) {
+	if (!timestamp) return '';
 	const milliseconds = timestamp * 1000;
 	const dateObj = datetime(milliseconds);
 	const dateString = dateObj.format('YYYY-MM-dd');
@@ -117,7 +130,7 @@ function createRegionTxt(regionName, regionDataArray) {
 	}
 
 	for (let i = 0; i < arrayCollection.length; i++) {
-		const array = arrayCollection[i].map(item => '* ' + item.replace(/[{\[\]}]/g, ''));
+		const array = arrayCollection[i].map(item => '* ' + item.replace(/[{\[\]}]/g, ''));		// NoSonar I'm pretty sure the escape characters are necessary
 		if (!array.length) continue;
 		array.sort();
 		txtContent.push(headers[i], ...array, '');

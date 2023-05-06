@@ -1,4 +1,4 @@
-import { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
+import { datetime } from "ptera";
 
 const dataFolder = './data/';
 const regions = Deno.readDirSync(dataFolder);
@@ -11,16 +11,8 @@ for (const region of regions) {
 	const regionDataArray = [];
 	for (const system of systems) {
 		if (!system.name.endsWith('.json')) continue;
-		const fileContent = Deno.readTextFileSync(dataFolder + region.name + '/' + system.name).trim();
-		const intermediateFileContent = fileContent.trim().substring(4, fileContent.length - 5);
-		const useableFileContent = (() => {
-			const arr = intermediateFileContent.trim().split('');
-			arr.pop();
-			const filteredArr = arr.filter(char => char != '\\');
-			const str = filteredArr.join('');
-			return str.replace(/\x00/g, '');	// NoSonar (I have no idea why this is necessary, but it is sadly...)
-		})();
-		const systemDataObj = JSON.parse(useableFileContent)[0];
+		const fileContent = Deno.readTextFileSync(dataFolder + region.name + '/' + system.name);
+		const systemDataObj = JSON.parse(fileContent)[0];
 		const extractedDataObj = extractData(systemDataObj);
 		regionDataArray.push(extractedDataObj);
 	}
@@ -44,8 +36,8 @@ function extractData(obj) {
 	})();
 
 	const outputObj = {
-		Glyphs: address,
 		Name: obj?.DM?.CN || '',
+		Glyphs: address,
 		Discoverer: obj.USN,
 		Platform: obj.PTK,
 		Timestamp: buildDate(obj.TS),

@@ -3,6 +3,7 @@
 		"ptera": "https://deno.land/x/ptera@v1.0.2/mod.ts"
 	},
 	"tasks": {
-		"run": "deno run --allow-read --allow-write main.js"
+		"run": "deno run --allow-read --allow-write main.js",
+		"build": "deno run compile --allow-read --allow-write main.js"
 	}
 }

@@ -1,18 +1,51 @@
 import { datetime } from "ptera";
 
+interface SystemDataRaw {
+	DD: {
+		UA: string
+		DT?: string;
+		VP?: string[];
+	};
+	PTK: string;
+	USN: string;
+	TS: string;
+	DM?: {
+		CN?: string;
+	}
+	PT?: string;
+	UID?: string;
+	RID?: string;
+	CV?: string;
+}
+
+interface SystemData {
+	Name: string;
+	Glyphs: string;
+	Discoverer: string;
+	Platform: string;
+	Timestamp: string;
+	'Correctly Tagged'?: boolean;
+}
+
+interface RegionData {
+	[key: string]: {
+		[key: string]: string;
+	}
+}
+
 const dataFolder = './data/';
 const regions = Deno.readDirSync(dataFolder);
-const civ = Deno.args[0] || 'AllRegions';
+const civ: string = Deno.args[0] || 'AllRegions';
 const validCivs = Object.keys(getRegionData());
-const globalDataArray = [];
+const globalDataArray: SystemData[] = [];
 for (const region of regions) {
 	const regionName = region.name;
 	const systems = Deno.readDirSync(dataFolder + regionName);
-	const regionDataArray = [];
+	const regionDataArray: SystemData[] = [];
 	for (const system of systems) {
 		if (!system.name.endsWith('.json')) continue;
 		const fileContent = Deno.readTextFileSync(dataFolder + region.name + '/' + system.name);
-		const systemDataObj = (() => {
+		const systemDataObj: SystemDataRaw = (() => {
 			try {
 				const json = JSON.parse(fileContent)[0];
 				return json;
@@ -30,14 +63,14 @@ for (const region of regions) {
 	}
 	createCSV(regionName, regionDataArray);
 	if (validCivs.includes(civ.toLowerCase())) createRegionTxt(regionName, regionDataArray);
-	console.log(`${regionName} done`)
+	console.log(`${regionName} done`);
 	globalDataArray.push(...regionDataArray);
 }
 createCSV(civ, globalDataArray);
-console.log(`Finished!`)
+console.log(`Finished!`);
 
 
-function extractData(obj) {
+function extractData(obj: SystemDataRaw): SystemData {
 	const address = (() => {
 		const addressString = obj.DD.UA;
 		const addressArray = addressString.split('');
@@ -47,7 +80,7 @@ function extractData(obj) {
 		return addressArray.join('').toUpperCase();
 	})();
 
-	const outputObj = {
+	const outputObj: SystemData = {
 		Name: obj?.DM?.CN || '',
 		Glyphs: address,
 		Discoverer: obj.USN,
@@ -64,7 +97,7 @@ function extractData(obj) {
 	return outputObj;
 }
 
-function createCSV(filepath, bodyDataArray) {
+function createCSV(filepath: string, bodyDataArray: SystemData[]): void {
 	const dataObj = bodyDataArray[0];
 	if (!dataObj) return;
 	const bodyString = createCSVBody(bodyDataArray);
@@ -74,8 +107,8 @@ function createCSV(filepath, bodyDataArray) {
 	Deno.writeTextFileSync(`${filepath}.csv`, dataArr.join('\n'));
 }
 
-function createCSVBody(regionDataArray) {
-	const outputArray = [];
+function createCSVBody(regionDataArray: SystemData[]) {
+	const outputArray: string[] = [];
 	for (const systemObj of regionDataArray) {
 		const systemDataArray = Object.values(systemObj);
 		outputArray.push(`"${systemDataArray.join('","')}"`);
@@ -83,27 +116,28 @@ function createCSVBody(regionDataArray) {
 	return outputArray.join('\n');
 }
 
-function buildDate(timestamp) {
+function buildDate(timestamp: string) {
 	if (!timestamp) return '';
-	const milliseconds = timestamp * 1000;
+	const timestampNum = parseInt(timestamp);
+	const milliseconds = timestampNum * 1000;
 	const dateObj = datetime(milliseconds);
 	const dateString = dateObj.format('YYYY-MM-dd');
 	return dateString;
 }
 
-function isCorrectlyTagged(glyphs, name) {
+function isCorrectlyTagged(glyphs: string, name: string): boolean {
 	if (!name) return false;
 	const expected = buildExpectedTag(glyphs);
 	return name.startsWith(expected);
 }
 
-function buildExpectedTag(glyphs) {
+function buildExpectedTag(glyphs: string): string {
 	const regionData = getRegionData();
 	const SIV = (() => {
 		const SID = glyphs.substring(1, 4);
 		const SIDDecNumber = parseInt(SID, 16);
 		const SIDNumber = SIDDecNumber.toString(16).toUpperCase();
-		if (SIDNumber == 69)
+		if (SIDNumber === '69')
 			return '68+1';
 		return SIDNumber;
 	})();
@@ -113,12 +147,12 @@ function buildExpectedTag(glyphs) {
 	return expected;
 }
 
-function createRegionTxt(regionName, regionDataArray) {
+function createRegionTxt(regionName: string, regionDataArray: SystemData[]): void {
 	const headers = ['Other Systems', 'Missing HUB Tag'].map(heading => `==${heading}==`);
-	const other = [];
-	const missing = [];
+	const other: string[] = [];
+	const missing: string[] = [];
 	const arrayCollection = [other, missing];
-	const txtContent = [];
+	const txtContent: string[] = [];
 
 	for (const system of regionDataArray) {
 		if (system['Correctly Tagged']) {
@@ -140,7 +174,7 @@ function createRegionTxt(regionName, regionDataArray) {
 	if (content) Deno.writeTextFileSync(`${regionName}.txt`, content.trim());
 }
 
-function getRegionData() {
+function getRegionData(): RegionData {
 	return {
 		eishub: {
 			'F9556C30': 'Riwala',

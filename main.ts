@@ -61,14 +61,19 @@ for (const region of regions) {
 		const extractedDataObj = extractData(systemDataObj);
 		regionDataArray.push(extractedDataObj);
 	}
-	createCSV(regionName, regionDataArray);
+	createDataFile(regionName, regionDataArray);
 	if (validCivs.includes(civ.toLowerCase())) createRegionTxt(regionName, regionDataArray);
 	console.log(`${regionName} done`);
 	globalDataArray.push(...regionDataArray);
 }
-createCSV(civ, globalDataArray);
+createDataFile(civ, globalDataArray);
 console.log(`Finished!`);
 
+
+function createDataFile(regionName: string, regionDataArray: SystemData[]) {
+	createCSV(regionName, regionDataArray);
+	createJSON(regionName, regionDataArray);
+}
 
 function extractData(obj: SystemDataRaw): SystemData {
 	const address = (() => {
@@ -172,6 +177,10 @@ function createRegionTxt(regionName: string, regionDataArray: SystemData[]): voi
 
 	const content = txtContent.join('\n');
 	if (content) Deno.writeTextFileSync(`${regionName}.txt`, content.trim());
+}
+
+function createJSON(filepath: string, dataArray: SystemData[]): void {
+	Deno.writeTextFileSync(`${filepath}.json`, JSON.stringify(dataArray, null, 2));
 }
 
 function getRegionData(): RegionData {

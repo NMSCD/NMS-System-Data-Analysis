@@ -81,7 +81,7 @@ function extractData(obj: SystemDataRaw): SystemData {
 		const addressArray = addressString.split('');
 		addressArray.shift()
 		addressArray.shift();			// remove first two 0
-		addressArray.splice(4, 2);		// remove galaxy index;
+		addressArray.splice(4, 2);		// NoSonar remove galaxy index;
 		return addressArray.join('').toUpperCase();
 	})();
 
@@ -124,7 +124,7 @@ function createCSVBody(regionDataArray: SystemData[]) {
 function buildDate(timestamp: string) {
 	if (!timestamp) return '';
 	const timestampNum = parseInt(timestamp);
-	const milliseconds = timestampNum * 1000;
+	const milliseconds = timestampNum * 1000;	// NoSonar the game uses seconds, but JS uses milliseconds
 	const dateObj = datetime(milliseconds);
 	const dateString = dateObj.format('YYYY-MM-dd');
 	return dateString;
@@ -139,14 +139,14 @@ function isCorrectlyTagged(glyphs: string, name: string): boolean {
 function buildExpectedTag(glyphs: string): string {
 	const regionData = getRegionData();
 	const SIV = (() => {
-		const SID = glyphs.substring(1, 4);
+		const SID = glyphs.substring(1, 4);		// NoSonar this gets the system ID
 		const SIDDecNumber = parseInt(SID, 16);
-		const SIDNumber = SIDDecNumber.toString(16).toUpperCase();
+		const SIDNumber = SIDDecNumber.toString(16).toUpperCase();		// NoSonar this is dec to hex conversion
 		if (SIDNumber === '69')
 			return '68+1';
 		return SIDNumber;
 	})();
-	const region = glyphs.substring(4);
+	const region = glyphs.substring(4);		// NoSonar this gets the region glyphs
 	const regionIndex = Object.keys(regionData[civ.toLowerCase()]).indexOf(region) + 1;
 	const expected = `[HUB${regionIndex}-${SIV}]`;
 	return expected;
@@ -180,7 +180,7 @@ function createRegionTxt(regionName: string, regionDataArray: SystemData[]): voi
 }
 
 function createJSON(filepath: string, dataArray: SystemData[]): void {
-	Deno.writeTextFileSync(`${filepath}.json`, JSON.stringify(dataArray, null, 2));
+	Deno.writeTextFileSync(`${filepath}.json`, JSON.stringify(dataArray, null, 2));		// NoSonar this sets an indent of 2 spaces in the JSON file
 }
 
 function getRegionData(): RegionData {

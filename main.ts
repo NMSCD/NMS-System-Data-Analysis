@@ -213,6 +213,19 @@ function getRegionData(): RegionData {
 			'F8557C2F': 'Cuculta',
 			'F8556C2F': 'Etmarao',
 			'F8555C2F': 'Otreie Void'
+		},
+		calhub: {
+			'F9556C30': 'Uisaor Spur',
+			'F9555C30': 'The Arm of Kiffeyn',
+			'F9555C31': 'Ilongl Cloud',
+			'F9556C31': 'The Arm of Taticale',
+			'F9557C31': 'Egerap Anomaly',
+			'F9557C30': 'Wakestones Expanse',
+			'F9557C2F': 'Erhahn Fringe',
+			'F9556C2F': 'Imrikians Terminus',
+			'F9555C2F': 'Imedeili',
+			'FA556C30': 'Kovasu Adjunct',
+			'F8556C30': 'Lossians Boundary'
 		}
 	}
 }

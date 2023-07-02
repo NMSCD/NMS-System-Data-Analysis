@@ -6,7 +6,7 @@ into CSV and JSON files.
 ## Usage
 
 The JSON files should be in subfolders of the `data` folder (you need to create
-it next to the `main.js` file if it isn't present). This Script is intended to
+it next to the `main.ts` file if it isn't present). This Script is intended to
 analyse multiple regions simultaneously. Each region will have its own output
 csv and json, and there will also be one global csv and json. The regions are represented by the
 folders in `data`.

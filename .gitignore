@@ -3,3 +3,4 @@ data
 *.txt
 *.json
 deno.lock
+*.exe

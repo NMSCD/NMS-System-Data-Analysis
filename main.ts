@@ -142,9 +142,7 @@ function buildExpectedTag(glyphs: string): string {
 		const SID = glyphs.substring(1, 4);		// NoSonar this gets the system ID
 		const SIDDecNumber = parseInt(SID, 16);
 		const SIDNumber = SIDDecNumber.toString(16).toUpperCase();		// NoSonar this is dec to hex conversion
-		if (SIDNumber === '69')
-			return '68+1';
-		return SIDNumber;
+		return SIDNumber.replaceAll('69', '68+1');
 	})();
 	const region = glyphs.substring(4);		// NoSonar this gets the region glyphs
 	const regionIndex = Object.keys(regionData[civ.toLowerCase()]).indexOf(region) + 1;

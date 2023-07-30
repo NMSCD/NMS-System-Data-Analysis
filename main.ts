@@ -24,6 +24,7 @@ interface SystemData {
 	Discoverer: string;
 	Platform: string;
 	Timestamp: string;
+	UnixTimestamp: number;
 	'Correctly Tagged'?: boolean;
 }
 
@@ -91,6 +92,7 @@ function extractData(obj: SystemDataRaw): SystemData {
 		Discoverer: obj.USN,
 		Platform: obj.PTK,
 		Timestamp: buildDate(obj.TS),
+		UnixTimestamp: parseInt(obj.TS) * 1000,
 	}
 
 	if (validCivs.includes(civ.toLowerCase())) {
@@ -224,6 +226,19 @@ function getRegionData(): RegionData {
 			'F9555C2F': 'Imedeili',
 			'FA556C30': 'Kovasu Adjunct',
 			'F8556C30': 'Lossians Boundary'
+		},
+		ghub: {
+			'F9556C30': 'The Arm of Vezitinen',
+			'F9555C30': 'Canthian',
+			'F9555C31': 'Dexterf Sector',
+			'F9556C31': 'The Arm of Katteus',
+			'F9557C31': 'Nugsdor Adjunct',
+			'F9557C30': 'Uefert Nebula',
+			'F9557C2F': 'Widraik',
+			'F9556C2F': 'Airnaka Conflux',
+			'F9555C2F': 'Sivess Instability',
+			'FA556C30': 'Savenix Instability',
+			'F8556C30': 'Nonlopsi Instability'
 		}
 	}
 }

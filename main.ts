@@ -24,7 +24,7 @@ interface SystemData {
 	Discoverer: string;
 	Platform: string;
 	Timestamp: string;
-	UnixTimestamp: number;
+	UnixTimestamp?: number;
 	'Correctly Tagged'?: boolean;
 }
 
@@ -105,9 +105,13 @@ function extractData(obj: SystemDataRaw): SystemData {
 }
 
 function createCSV(filepath: string, bodyDataArray: SystemData[]): void {
-	const dataObj = bodyDataArray[0];
+	const csvData = structuredClone(bodyDataArray).map((item: SystemData) => {
+		delete item.UnixTimestamp;
+		return item;
+	})
+	const dataObj = csvData[0];
 	if (!dataObj) return;
-	const bodyString = createCSVBody(bodyDataArray);
+	const bodyString = createCSVBody(csvData);
 	const sep = `sep=,`;
 	const header = Object.keys(dataObj).join('","');
 	const dataArr = [sep, `"${header}"`, bodyString];

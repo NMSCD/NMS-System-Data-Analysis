@@ -50,7 +50,7 @@ for (const region of regions) {
 			try {
 				const json = JSON.parse(fileContent)[0];
 				return json;
-			} catch (_error) {
+			} catch {
 				return {
 					DD: { UA: '' },
 					USN: '',
